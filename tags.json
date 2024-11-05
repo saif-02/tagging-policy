@@ -1,0 +1,79 @@
+{
+    "properties": {
+        "displayName": "Enforce Mandatory Tags on All Resources - ASKID, Environment, Owner, Project, Terraform",
+        "policyType": "Custom",
+        "mode": "All",
+        "description": "This policy requires all Azure resources to have mandatory tags: ASKID, Environment, Owner, Project, and Terraform.",
+        "parameters": {
+            "tagName1": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "ASKID",
+                    "description": "ASKID tag must be present on all resources."
+                },
+                "defaultValue": "ASKID"
+            },
+            "tagName2": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Environment",
+                    "description": "Environment tag must be present on all resources."
+                },
+                "defaultValue": "Environment"
+            },
+            "tagName3": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Owner",
+                    "description": "Owner tag must be present on all resources."
+                },
+                "defaultValue": "Owner"
+            },
+            "tagName4": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Project",
+                    "description": "Project tag must be present on all resources."
+                },
+                "defaultValue": "Project"
+            },
+            "tagName5": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Terraform",
+                    "description": "Terraform tag must be present on all resources."
+                },
+                "defaultValue": "Terraform"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "anyOf": [
+                    {
+                        "field": "[concat('tags[', parameters('tagName1'), ']')]",
+                        "exists": "false"
+                    },
+                    {
+                        "field": "[concat('tags[', parameters('tagName2'), ']')]",
+                        "exists": "false"
+                    },
+                    {
+                        "field": "[concat('tags[', parameters('tagName3'), ']')]",
+                        "exists": "false"
+                    },
+                    {
+                        "field": "[concat('tags[', parameters('tagName4'), ']')]",
+                        "exists": "false"
+                    },
+                    {
+                        "field": "[concat('tags[', parameters('tagName5'), ']')]",
+                        "exists": "false"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        }
+    }
+}
