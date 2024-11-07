@@ -30,4 +30,20 @@ policyresources
 
 
 
+policyresources
+| extend complianceState = tostring(properties['complianceState']), 
+         resourceId = tostring(properties['resourceId']), 
+         timestamp = todatetime(tostring(properties['timestamp'])), 
+         policyDefinitionName = tostring(properties['policyDefinitionName']),
+         policyAssignmentId = tostring(properties['policyAssignmentId'])  // Assuming this is the field for policy assignment ID
+| where timestamp > ago(1d) 
+      and complianceState == "NonCompliant" 
+      and policyAssignmentId == "<YourSpecificPolicyAssignmentId>"  // Replace with your specific policy assignment ID
+| project subscriptionId, complianceState, resourceId, timestamp, policyDefinitionName, policyAssignmentId
+| summarize latestTimestamp = max(timestamp) by subscriptionId, resourceId, complianceState, policyDefinitionName, policyAssignmentId
+| order by latestTimestamp desc
+
+
+
+
 
