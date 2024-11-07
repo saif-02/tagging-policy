@@ -2,6 +2,24 @@ policyresources
 | extend complianceState = tostring(properties['complianceState']), 
          resourceId = tostring(properties['resourceId']), 
          timestamp = todatetime(tostring(properties['timestamp'])), 
+         policyDefinitionName = tostring(properties['policyDefinitionName']),
+         complianceReason = tostring(properties['complianceReason'])  // Assuming the compliance reason is stored here
+| where timestamp > ago(1d) 
+      and complianceState == "NonCompliant" 
+      and policyDefinitionName == "<YourSpecificPolicyDefinitionName>"  // Replace with your specific policy definition name
+| project subscriptionId, complianceState, resourceId, timestamp, policyDefinitionName, complianceReason  // Select relevant columns for output
+| summarize latestTimestamp = max(timestamp) by subscriptionId, resourceId, complianceState, policyDefinitionName, complianceReason  // Summarize to get the latest timestamp for each resource
+| order by latestTimestamp desc  // Order results by the most recent timestamp first
+
+
+
+
+`````````````````
+
+policyresources
+| extend complianceState = tostring(properties['complianceState']), 
+         resourceId = tostring(properties['resourceId']), 
+         timestamp = todatetime(tostring(properties['timestamp'])), 
          policyDefinitionName = tostring(properties['policyDefinitionName'])
 | where timestamp > ago(1d)
 | project subscriptionId, complianceState, resourceId, timestamp, policyDefinitionName
