@@ -2,7 +2,7 @@ Resources
 | where type == "microsoft.policyinsights/compliances"
 | extend complianceStatus = properties.complianceState
 | where complianceStatus == "NonCompliant"
-| extend tagDetails = properties.details[0].additionalProperties
+| extend tagDetails = tostring(properties.details[0].additionalProperties)
 | where tagDetails contains "tags"
-| project resourceId, complianceStatus, policyAssignmentId, policyAssignmentName = properties.policyAssignmentName, missingTags = tagDetails["missingTags"], complianceTimestamp = properties.timestamp
-| summarize nonCompliantCount = count() by policyAssignmentId, policyAssignmentName, complianceTimestamp
+| project resourceId = id, complianceStatus, policyAssignmentId = properties.policyAssignmentId, policyAssignmentName = properties.policyAssignmentName, missingTags = tagDetails
+| summarize nonCompliantCount = count() by policyAssignmentId, policyAssignmentName
