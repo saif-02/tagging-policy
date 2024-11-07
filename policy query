@@ -4,5 +4,5 @@ Resources
 | where complianceStatus == "NonCompliant"
 | extend tagDetails = properties.details[0].additionalProperties
 | where tagDetails contains "tags"
-| project resourceId, complianceStatus, policyAssignmentId, policyAssignmentName = properties.policyAssignmentName, missingTags = tagDetails["missingTags"]
-| summarize nonCompliantCount = count() by policyAssignmentId, policyAssignmentName
+| project resourceId, complianceStatus, policyAssignmentId, policyAssignmentName = properties.policyAssignmentName, missingTags = tagDetails["missingTags"], complianceTimestamp = properties.timestamp
+| summarize nonCompliantCount = count() by policyAssignmentId, policyAssignmentName, complianceTimestamp
