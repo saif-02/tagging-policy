@@ -1,21 +1,20 @@
 policyresources
-| extend complianceState=tostring(properties['complianceState']), resourceId=tostring(properties['resourceId']),timestamp=todatetime(tostring(properties['timestamp'])),policyDefinitionName=tostring(properties['policyDefinitionName'])
+| extend complianceState = tostring(properties['complianceState']), 
+         resourceId = tostring(properties['resourceId']), 
+         timestamp = todatetime(tostring(properties['timestamp'])), 
+         policyDefinitionName = tostring(properties['policyDefinitionName'])
 | where timestamp > ago(1d)
-| project subscriptionId, complianceState, resourceId, timestamp,policyDefinitionName
-| summarize max(timestamp) by subscriptionId, resourceId,complianceState,policyDefinitionName
-| summarize complianceStates=make_list(complianceState) by subscriptionId, resourceId
-| summarize Total = count()
-, Compliant = countif((complianceStates notcontains "NonCompliant") and (complianceStates contains "Compliant"))
-, Exempt = countif((complianceStates notcontains "NonCompliant") and (complianceStates notcontains "Compliant") and (complianceStates contains "Exempt"))
-, ['Non-Compliant'] = countif (complianceStates contains "NonCompliant")
-by subscriptionId
-| extend ['Compliance %'] = round(toreal(Compliant + Exempt)*100 / toreal(Total), 2)
+| project subscriptionId, complianceState, resourceId, timestamp, policyDefinitionName
+| summarize latestTimestamp = max(timestamp) by subscriptionId, resourceId, complianceState, policyDefinitionName
+| summarize complianceStates = make_list(complianceState) by subscriptionId, resourceId
+| summarize 
+     Total = count(),
+     Compliant = countif((complianceStates notcontains "NonCompliant") and (complianceStates contains "Compliant")),
+     Exempt = countif((complianceStates notcontains "NonCompliant") and (complianceStates notcontains "Compliant") and (complianceStates contains "Exempt")),
+     ['Non-Compliant'] = countif(complianceStates contains "NonCompliant")
+    by subscriptionId
+| extend ['Compliance %'] = round(toreal(Compliant + Exempt) * 100 / toreal(Total), 2)
 | order by ['Compliance %'] desc
 
 
-Resources
-| where type == "microsoft.policyinsights/compliances"
-| extend complianceStatus = properties.complianceState
-| where complianceStatus == "NonCompliant"
-| where properties.policyAssignmentId == "YourPolicyAssignmentId"
-| project resourceId = id, complianceStatus, policyAssignmentId = properties.policyAssignmentId, policyAssignmentName = properties.policyAssignmentName
+
