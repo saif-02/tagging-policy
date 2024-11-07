@@ -43,6 +43,16 @@ policyresources
 | summarize latestTimestamp = max(timestamp) by subscriptionId, resourceId, complianceState, policyDefinitionName, policyAssignmentId
 | order by latestTimestamp desc
 
+policyresources
+| extend complianceState = tostring(properties['complianceState']), 
+         resourceId = tostring(properties['resourceId']), 
+         timestamp = todatetime(tostring(properties['timestamp'])), 
+         policyDefinitionName = tostring(properties['policyDefinitionName']),
+         complianceReason = tostring(properties['complianceReason'])  // Assuming the compliance reason is stored here
+| where timestamp > ago(1d) and complianceState == "NonCompliant"  // Filter for Non-Compliant resources in the last 1 day
+| project subscriptionId, complianceState, resourceId, timestamp, policyDefinitionName, complianceReason  // Include compliance reason in the output
+| summarize latestTimestamp = max(timestamp) by subscriptionId, resourceId, complianceState, policyDefinitionName, complianceReason  // Summarize to get the latest timestamp for each resource
+| order by latestTimestamp desc  // Order by the most recent timestamp
 
 
 
